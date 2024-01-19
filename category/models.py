@@ -14,7 +14,7 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
     def get_url(self):
-        print(reverse("products_by_category",args=[self.slug]))
+        #print(reverse("products_by_category",args=[self.slug]))
         return reverse("products_by_category",args=[self.slug])
 
     def __str__(self) -> str:

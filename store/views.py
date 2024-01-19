@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404, render
+from carts.models import CartItem
+from carts.views import _cart_id
 
 from category.models import Category
 
@@ -15,7 +17,7 @@ def store(request,category_slug=None):
         products = Product.objects.filter(is_avialable=True,category=categories)
         product_count = products.count()
     else:
-        products = Product.objects.all().filter(is_avialable=True)
+        products = Product.objects.all().filter(is_avialable=True).order_by('id')
         product_count = products.count()
     categories = Category.objects.all()
     context = {
@@ -27,7 +29,10 @@ def store(request,category_slug=None):
 
 def product_detail(request,category_slug,product_slug):
     product= get_object_or_404(Product,slug=product_slug,category__slug=category_slug)
+    in_cart = CartItem.objects.filter(cart__cart_id = _cart_id(request),product=product).exists()
+    
     context = {
-        'product' : product
+        'product' : product,
+        'in_cart' : in_cart,
     }
     return render(request,'store/product_detail.html',context)
