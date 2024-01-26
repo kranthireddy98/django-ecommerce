@@ -7,5 +7,3 @@ def home(request):
     }
     return render(request,'home.html',context)
 
-def signin(request):
-    return render(request,'signin.html')
