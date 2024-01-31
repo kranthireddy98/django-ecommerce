@@ -3,6 +3,9 @@ from django.shortcuts import redirect, render
 
 from django.contrib import messages,auth
 
+from carts.models import Cart, CartItem
+from carts.views import _cart_id
+import requests
 from .models import Account
 
 from .form import RegistrationForm
@@ -72,9 +75,64 @@ def login(request):
         user  = auth.authenticate(email=email,password=password)
 
         if user:
+            try:
+                cart = Cart.objects.get(cart_id = _cart_id(request))
+                print(cart)
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                print(is_cart_item_exists)
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+                    #print(cart_item)
+
+                    #GEt Product Variations by cart Id
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variations.all()
+                        product_variation.append(list(variation))
+
+                    #get cart item from the user to access his product variations
+                        
+                    cart_items = CartItem.objects.filter(user=user)
+
+                    existing_variations_list = []
+                    id = []
+                    for cart_item in cart_items:
+
+                        existing_variations_list.append(list(cart_item.variations.all()))
+                        id.append(cart_item.id)
+                    
+                    for pr in product_variation:
+                        if pr in existing_variations_list:
+                            index = existing_variations_list.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity +=1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user
+                                item.save()
+            except:
+                pass
+
             auth.login(request,user)
             messages.success(request,'you are logged in')
-            return redirect('dashboard')
+
+            url = request.META.get('HTTP_REFERER')
+
+            try :
+                query = requests.utils.urlparse(url).query
+
+                params = dict(x.split('=') for x in query.split('&'))
+
+                if 'next' in params:
+                    nextPage =  params['next']
+                    return redirect(nextPage)
+
+            except:
+                return redirect('dashboard')
         else:
             messages.error(request,'Invalid Login credentials')
             return redirect('login')
