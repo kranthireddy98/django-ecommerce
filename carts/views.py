@@ -14,7 +14,7 @@ def _cart_id(request):
 
     return cart
 
-  
+ 
 def add_cart(request,product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id)
