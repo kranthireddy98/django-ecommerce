@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Product, Variation
+from .models import Product, ReviewRating, Variation
 
 # Register your models here.
 class ProductAdmin(admin.ModelAdmin):
@@ -13,3 +13,4 @@ class VariationAdmin(admin.ModelAdmin):
     list_editable = ('is_active',)#to make field editable in the table view directly
     list_filter = ('product','variation_category','variation_value')# to make table view to filter based on the given values in the tuple
 admin.site.register(Variation,VariationAdmin)
+admin.site.register(ReviewRating)
